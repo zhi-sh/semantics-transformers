@@ -1,0 +1,9 @@
+# temp dir
+**/__pycache__
+**/.vscode
+
+# data
+**/data
+
+*.pyc
+
