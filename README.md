@@ -1,2 +1,1 @@
-# pytorch_labs
-project based on pytorch
+# projects based on pytorch
