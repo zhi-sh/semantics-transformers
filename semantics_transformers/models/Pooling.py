@@ -41,7 +41,7 @@ class Pooling(nn.Module, AbstractModel):
         self.pooling_output_dimension = (pooling_mode_multiplier * word_embedding_dimension)
 
     def forward(self, features: Dict[str, Tensor]):
-        token_embeddings = features['token_embeddings']
+        token_embeddings = features['semantics_embedding']
         cls_token = features['cls_token_embeddings']
         attention_mask = features['attention_mask']
 

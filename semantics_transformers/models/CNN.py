@@ -19,7 +19,7 @@ class CNN(nn.Module, AbstractModel):
         输出： [batch, seq_len, out_channels * len(kernel_sizes)]
     '''
 
-    def __init__(self, embedding_dimension: int, out_channels: int = 256, kernel_sizes: List[int] = [1, 3, 5], embedding_name='text_embeddings'):
+    def __init__(self, embedding_dimension: int, out_channels: int = 256, kernel_sizes: List[int] = [1, 3, 5], embedding_name='semantics_embedding'):
         super(CNN, self).__init__()
         self.config_keys = ['embedding_dimension', 'out_channels', 'kernel_sizes', 'embedding_name']
         self.embedding_dimension = embedding_dimension
@@ -36,11 +36,11 @@ class CNN(nn.Module, AbstractModel):
             self.convs.append(conv)
 
     def forward(self, features):
-        text_embeddings = features[self.embedding_name]  # [bs, len, dim]
-        text_embeddings = text_embeddings.transpose(1, -1)  # [bs, dim, len]
-        vectors = [conv(text_embeddings) for conv in self.convs]  # [bs, dim, len] * len(kernel_sizes)
-        text_embeddings = torch.cat(vectors, dim=1).transpose(1, -1)  # [bs, len, out_channel*len(kernel_sizes)
-        features.update({'text_embeddings': text_embeddings})
+        semantics_embeddings = features[self.embedding_name]  # [bs, len, dim]
+        semantics_embeddings = semantics_embeddings.transpose(1, -1)  # [bs, dim, len]
+        vectors = [conv(semantics_embeddings) for conv in self.convs]  # [bs, dim, len] * len(kernel_sizes)
+        semantics_embeddings = torch.cat(vectors, dim=1).transpose(1, -1)  # [bs, len, out_channel*len(kernel_sizes)
+        features.update({'semantics_embedding': semantics_embeddings})
         return features
 
     @property
