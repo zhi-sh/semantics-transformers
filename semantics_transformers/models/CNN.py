@@ -36,11 +36,11 @@ class CNN(nn.Module, AbstractModel):
             self.convs.append(conv)
 
     def forward(self, features):
-        semantics_embeddings = features[self.embedding_name]  # [bs, len, dim]
-        semantics_embeddings = semantics_embeddings.transpose(1, -1)  # [bs, dim, len]
-        vectors = [conv(semantics_embeddings) for conv in self.convs]  # [bs, dim, len] * len(kernel_sizes)
-        semantics_embeddings = torch.cat(vectors, dim=1).transpose(1, -1)  # [bs, len, out_channel*len(kernel_sizes)
-        features.update({'semantics_embedding': semantics_embeddings})
+        embeddings = features[self.embedding_name]  # [bs, len, dim]
+        embeddings = embeddings.transpose(1, -1)  # [bs, dim, len]
+        vectors = [conv(embeddings) for conv in self.convs]  # [bs, dim, len] * len(kernel_sizes)
+        embeddings = torch.cat(vectors, dim=1).transpose(1, -1)  # [bs, len, out_channel*len(kernel_sizes)
+        features.update({'semantics_embedding': embeddings})
         return features
 
     @property
