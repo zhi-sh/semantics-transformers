@@ -1,25 +1,23 @@
 # -*- coding: utf-8 -*-
-# @DateTime :2021/3/2
+# @DateTime :2021/3/4
 # @Author   :zhi.liu
 
 # ------------------------------------------------------------------------------
 import csv, logging, os
-from typing import List
-import torch
-from tqdm import tqdm
+import numpy as np
 from torch.utils.data import DataLoader
 from semantics_transformers.evaluations import AbstractEvaluation
 
 logger = logging.getLogger(__name__)
 
 
-class LabelAccuracyEvaluator(AbstractEvaluation):
-    def __init__(self, dataloader: DataLoader, name: str = '', softmax_model=None):
+class CEBinaryAccuracyEvaluator(AbstractEvaluation):
+    def __init__(self, dataloader: DataLoader, name: str = '', threshold: int = 0.5):
         self.dataloader = dataloader
         self.name = name
-        self.softmax_model = softmax_model
+        self.threshold = threshold
 
-        self.csv_file = f'accuracy_evaluation_{name}_results.csv'
+        self.csv_file = f'ceb_evaluation_{name}_results.csv'
         self.csv_headers = ['epoch', 'steps', 'accuracy']
 
     def __call__(self, model, output_path: str = None, epoch: int = -1, steps: int = -1) -> float:
@@ -37,15 +35,12 @@ class LabelAccuracyEvaluator(AbstractEvaluation):
             out_txt = ':'
         logger.info(f"evaluation on the {self.name} dataset {out_txt}")
 
-        self.dataloader.collate_fn = model.batching_collate
-        for step, batch in enumerate(tqdm(self.dataloader, desc='Evaluating')):
-            features, label_ids = batch
-            with torch.no_grad():
-                _, prediction = self.softmax_model(features, labels=None)
-            total += prediction.size(0)
-            correct += torch.argmax(prediction, dim=1).eq(label_ids.view(-1)).sum().item()
-        accuracy = correct / total
-        logger.info("Accuracy: {:.4f} ({}/{})\n".format(accuracy, correct, total))
+        pred_scores, labels = model.predict(self.dataloader, need_labels=True)
+        pred_labels = pred_scores > self.threshold
+
+        assert len(pred_labels) == len(labels)
+        accuracy = np.sum(pred_labels == labels) / len(labels)
+        logger.info(f"Accuracy: {accuracy * 100:.6f}")
 
         # 评估结果保存至文件
         if output_path is not None:
@@ -59,5 +54,5 @@ class LabelAccuracyEvaluator(AbstractEvaluation):
                 with open(csv_path, mode='a', encoding='utf-8') as fout:
                     writer = csv.writer(fout)
                     writer.writerow([epoch, steps, accuracy])
-        print("Accuracy: {:.4f} ({}/{})\n".format(accuracy, correct, total))
+        print(f"Accuracy: {accuracy:.6f}\n")
         return accuracy

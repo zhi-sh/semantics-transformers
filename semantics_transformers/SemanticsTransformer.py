@@ -185,6 +185,10 @@ class SemanticsTransformer(nn.Sequential):
             # TODO nn.DataParaParallel compatibility
             return torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
+    @property
+    def dimension(self) -> int:
+        self._last_module().dimension
+
     # --------------------------------------------- 内部函数 ----------------------------------------------------------
     def _eval_during_training(self, evaluator, output_path, save_best_model, epoch, steps):
         if evaluator is not None:  # 如果存在评估实体，则进行评估模型的过程
@@ -214,3 +218,6 @@ class SemanticsTransformer(nn.Sequential):
     def _first_module(self):
         r'''returns the first moudle of this sequential embedder'''
         return self._modules[next(iter(self._modules))]
+
+    def _last_module(self):
+        return self._modules[next(reversed(self._modules))]

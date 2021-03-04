@@ -5,3 +5,4 @@
 # ------------------------------------------------------------------------------
 from semantics_transformers.evaluations.AbstractEvaluation import AbstractEvaluation
 from semantics_transformers.evaluations.LabelAccuracyEvaluator import LabelAccuracyEvaluator
+from semantics_transformers.evaluations.CEBinaryAccuracyEvaluator import CEBinaryAccuracyEvaluator
